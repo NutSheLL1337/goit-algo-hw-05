@@ -1,5 +1,6 @@
-import numpy as np
 import timeit
+
+# Читання текстів з файлів
 with open('стаття 1.txt', 'r', encoding='utf-8', errors='ignore') as file:
     text1 = file.read()
 
@@ -7,13 +8,13 @@ with open('стаття 2.txt', 'r', encoding='utf-8', errors='ignore') as file:
     text2 = file.read()
 
 
+# Алгоритми пошуку
+
 def bad_char_heuristic(pattern):
     bad_char = {}
     for i in range(len(pattern)):
         bad_char[pattern[i]] = i
-    # Повертаємо словник для шаблону
     return bad_char
-
 
 def good_suffix_heuristic(pattern):
     m = len(pattern)
@@ -49,19 +50,15 @@ def boyer_moore_search(text, pattern):
     good_suffix = good_suffix_heuristic(pattern)
 
     s = 0
-    steps = []
-
     while s <= n - m:
         j = m - 1
-
         while j >= 0 and pattern[j] == text[s + j]:
             j -= 1
 
         if j < 0:
-            steps.append((s, f"Substring found at index {s}"))
+            return s
             s += good_suffix[0]
         else:
-            # Якщо символа немає в шаблоні, повертаємо значення -1
             bad_char_shift = bad_char.get(text[s + j], -1)
             if bad_char_shift == -1:
                 bad_char_shift = j + 1
@@ -70,11 +67,7 @@ def boyer_moore_search(text, pattern):
 
             good_suffix_shift = good_suffix[j + 1]
             s += max(bad_char_shift, good_suffix_shift)
-
-        steps.append((s, f"Index: {s}, Bad char: {bad_char_shift}, Good char: {good_suffix_shift}"))
-    return steps
-
-
+    return -1
 
 def compute_lps(pattern):
     lps = [0] * len(pattern)
@@ -117,7 +110,6 @@ def kmp_search(main_string, pattern):
 
     return -1
 
-
 def rabin_karp_search(text, pattern, prime=101):
     m = len(pattern)
     n = len(text)
@@ -145,10 +137,11 @@ def rabin_karp_search(text, pattern, prime=101):
     return -1
 
 
+# Вибір підрядків
 existing_substring = "jumpStep += (int)(Math.sqrt(arrayLength))"
 non_existing_substring = "вигаданий підрядок"
 
-
+# Вимірювання часу для статті 1
 time_boyer_moore_existing_1 = timeit.timeit(lambda: boyer_moore_search(text1, existing_substring), number=10)
 time_boyer_moore_non_existing_1 = timeit.timeit(lambda: boyer_moore_search(text1, non_existing_substring), number=10)
 
@@ -158,7 +151,7 @@ time_kmp_non_existing_1 = timeit.timeit(lambda: kmp_search(text1, non_existing_s
 time_rabin_karp_existing_1 = timeit.timeit(lambda: rabin_karp_search(text1, existing_substring), number=10)
 time_rabin_karp_non_existing_1 = timeit.timeit(lambda: rabin_karp_search(text1, non_existing_substring), number=10)
 
-
+# Вимірювання часу для статті 2
 time_boyer_moore_existing_2 = timeit.timeit(lambda: boyer_moore_search(text2, existing_substring), number=10)
 time_boyer_moore_non_existing_2 = timeit.timeit(lambda: boyer_moore_search(text2, non_existing_substring), number=10)
 
@@ -168,33 +161,19 @@ time_kmp_non_existing_2 = timeit.timeit(lambda: kmp_search(text2, non_existing_s
 time_rabin_karp_existing_2 = timeit.timeit(lambda: rabin_karp_search(text2, existing_substring), number=10)
 time_rabin_karp_non_existing_2 = timeit.timeit(lambda: rabin_karp_search(text2, non_existing_substring), number=10)
 
+# Виведення результатів в консоль
+print("\n=== Час виконання для статті 1 ===")
+print(f"Boyer-Moore (існуючий підрядок): {time_boyer_moore_existing_1:.6f} секунд")
+print(f"Boyer-Moore (неіснуючий підрядок): {time_boyer_moore_non_existing_1:.6f} секунд")
+print(f"KMP (існуючий підрядок): {time_kmp_existing_1:.6f} секунд")
+print(f"KMP (неіснуючий підрядок): {time_kmp_non_existing_1:.6f} секунд")
+print(f"Rabin-Karp (існуючий підрядок): {time_rabin_karp_existing_1:.6f} секунд")
+print(f"Rabin-Karp (неіснуючий підрядок): {time_rabin_karp_non_existing_1:.6f} секунд")
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-labels = ['Boyer-Moore', 'KMP', 'Rabin-Karp']
-
-existing_times_1 = [time_boyer_moore_existing_1, time_kmp_existing_1, time_rabin_karp_existing_1]
-non_existing_times_1 = [time_boyer_moore_non_existing_1, time_kmp_non_existing_1, time_rabin_karp_non_existing_1]
-
-existing_times_2 = [time_boyer_moore_existing_2, time_kmp_existing_2, time_rabin_karp_existing_2]
-non_existing_times_2 = [time_boyer_moore_non_existing_2, time_kmp_non_existing_2, time_rabin_karp_non_existing_2]
-
-x = np.arange(len(labels))
-width = 0.2
-
-fig, ax = plt.subplots(figsize=(14, 8))
-rects1 = ax.bar(x - width, existing_times_1, width, label='Existing Substring (Article 1)')
-rects2 = ax.bar(x, non_existing_times_1, width, label='Non-Existing Substring (Article 1)')
-rects3 = ax.bar(x + width, existing_times_2, width, label='Existing Substring (Article 2)')
-rects4 = ax.bar(x + 2 * width, non_existing_times_2, width, label='Non-Existing Substring (Article 2)')
-
-ax.set_ylabel('Time (seconds)')
-ax.set_title('Algorithm Performance Comparison')
-ax.set_xticks(x)
-ax.set_xticklabels(labels)
-ax.legend()
-
-fig.tight_layout()
-plt.show()
-
+print("\n=== Час виконання для статті 2 ===")
+print(f"Boyer-Moore (існуючий підрядок): {time_boyer_moore_existing_2:.6f} секунд")
+print(f"Boyer-Moore (неіснуючий підрядок): {time_boyer_moore_non_existing_2:.6f} секунд")
+print(f"KMP (існуючий підрядок): {time_kmp_existing_2:.6f} секунд")
+print(f"KMP (неіснуючий підрядок): {time_kmp_non_existing_2:.6f} секунд")
+print(f"Rabin-Karp (існуючий підрядок): {time_rabin_karp_existing_2:.6f} секунд")
+print(f"Rabin-Karp (неіснуючий підрядок): {time_rabin_karp_non_existing_2:.6f} секунд")
